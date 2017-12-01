@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Robot Vera</title>
+	<style type="text/css">
+		@import url(https://fonts.googleapis.com/css?family=Merriweather:700);
+		body, html {
+		  padding: 0;
+		  margin: 0;
+      overflow:hidden;
+		}
+
+		h2 {
+		  font-size: 2em;
+		  color: #d4ffce;
+		  font-family: 'Merriweather', serif;
+		  letter-spacing: 2px;
+		  pointer-events: none;
+		  font-weight: 0;
+		  position: absolute;
+		  top: 2%;
+		  left: 2%;
+		  right: 0;
+		  text-align: left;
+		}
+		.mySlides {
+position: absolute;
+  /* height: 80%; */
+  /* top: 10%; */
+  /* left: 10%; */
+  /* right: 10%; */
+  width: 80%;
+  max-width: 1024px;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+	</style>
+</head>
+<body>
+
+
+
+
+<img id="imgClickAndChange" class="mySlides" src="images/1.png">
+
+
+<video id="video" class="mySlides" hidden src="video/nn.mp4" muted></video>
+
+
+<canvas></canvas>
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+
+
+    var imgs = ["images/1.png", 
+    "images/2.png",
+    "images/3.png",
+    "images/4.png",
+    "images/5.png",
+    "images/6.png",
+    "images/7.png",
+    "images/8.png",
+    "images/9.png",
+    "images/10.png",
+    "images/11.png",
+    "images/12.png",
+    "images/13.png",
+    "images/14.png",
+    "images/15.png",
+    "images/16.png",
+    "images/17.png",
+    "images/18.png",
+    "images/19.png",
+    "images/20.png"];
+
+    function changeImage(dir) {
+      var img = document.getElementById("imgClickAndChange");
+      var video = document.getElementById("video");
+      for(var a in imgs){
+        console.log(a);
+  		   if (img.src.indexOf(imgs[parseInt(a)]) !== -1 ){
+	            if ((parseInt(a) + dir) === 2){
+	                img.style.display = 'none';
+	                img.src = "images/3.png";
+	                video.style.display = 'block';
+	                video.play();
+	                break;
+	            }
+  		   		if ( 0 >= (parseInt(a) + dir)){
+                img.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
+  		   			  img.src =  imgs[imgs.length-1];
+  		       		break;
+  		   		}else if ((parseInt(a) + dir) > imgs.length-1){
+                img.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
+  		   			  img.src =  imgs[0];
+  		   			  break;
+  		   		}else{
+                img.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
+  		       		img.src =  imgs[parseInt(a) + dir];
+  		   			  break;
+  		   		}
+  		   }
+  		}
+    }
+
+    document.onkeydown = function(e) {
+        e = e || window.event;
+        if (e.keyCode == '33' || e.keyCode == '37') {
+            changeImage(-1) //left <- show Prev image
+        } else if (e.keyCode == '34' || e.keyCode == '39') {
+            // right -> show next image
+            changeImage(1)
+        }
+    }
+
+
+
+
+var canvas = document.querySelector("canvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+var ctx = canvas.getContext("2d");
+
+var TAU = 2 * Math.PI;
+
+times = [];
+function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function Ball (startX, startY, startVelX, startVelY) {
+  this.x = startX || Math.random() * canvas.width;
+  this.y = startY || Math.random() * canvas.height;
+  this.vel = {
+    x: startVelX || Math.random() * 2 - 1,
+    y: startVelY || Math.random() * 2 - 1
+  };
+  this.update = function(canvas) {
+    if (this.x > canvas.width + 50 || this.x < -50) {
+      this.vel.x = -this.vel.x;
+    }
+    if (this.y > canvas.height + 50 || this.y < -50) {
+      this.vel.y = -this.vel.y;
+    }
+    this.x += this.vel.x;
+    this.y += this.vel.y;
+  };
+  this.draw = function(ctx, can) {
+    ctx.beginPath();
+    ctx.globalAlpha = .4;
+    ctx.fillStyle = 'ff686e';
+    ctx.arc((0.5 + this.x) | 0, (0.5 + this.y) | 0, 3, 0, TAU, false);
+    ctx.fill();
+  }
+}
+
+var balls = [];
+for (var i = 0; i < canvas.width * canvas.height / (50*100); i++) {
+  balls.push(new Ball(Math.random() * canvas.width, Math.random() * canvas.height));
+}
+
+var lastTime = Date.now();
+function update() {
+  var diff = Date.now() - lastTime;
+  for (var frame = 0; frame * 32.6667 < diff; frame++) {
+    for (var index = 0; index < balls.length; index++) {
+      balls[index].update(canvas);
+    }
+  }
+  lastTime = Date.now();
+}
+var mouseX = -1e9, mouseY = -1e9;
+document.addEventListener('mousemove', function(event) {
+  mouseX = event.clientX;
+  mouseY = event.clientY;
+});
+
+function distMouse(ball) {
+  return Math.hypot(ball.x - mouseX, ball.y - mouseY);
+}
+
+function draw() {
+  ctx.globalAlpha=1;
+  ctx.fillStyle = '#351e4f';
+  ctx.fillRect(0,0,canvas.width, canvas.height);
+  for (var index = 0; index < balls.length; index++) {
+    var ball = balls[index];
+    ball.draw(ctx, canvas);
+    ctx.beginPath();
+    for (var index2 = balls.length - 1; index2 > index; index2 += -1) {
+      var ball2 = balls[index2];
+      var dist = Math.hypot(ball.x - ball2.x, ball.y - ball2.y);
+        if (dist < 200) {
+          ctx.strokeStyle = "#d4ffce";
+          ctx.globalAlpha = 1 - (dist > 50 ? .8 : dist / 20);
+          ctx.lineWidth = "1px";
+          ctx.moveTo((0.5 + ball.x) | 0, (0.5 + ball.y) | 0);
+          ctx.lineTo((0.5 + ball2.x) | 0, (0.5 + ball2.y) | 0);
+        }
+    }
+    ctx.stroke();
+  }
+}
+
+// Start
+loop();
+
+
+</script>
